@@ -56,6 +56,7 @@ builder.Services.AddScoped<EnrollmentService>();
 builder.Services.AddScoped<ProgressService>();
 builder.Services.AddScoped<DiscussionService>();
 builder.Services.AddScoped<AnnouncementService>();
+builder.Services.AddScoped<AdminService>();
 
 builder.Services.AddAuthorization();
 
