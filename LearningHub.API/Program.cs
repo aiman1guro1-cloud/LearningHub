@@ -1,9 +1,11 @@
 using LearningHub.API.Data;
+using LearningHub.API.Data;
+using LearningHub.API.Helpers;
+using LearningHub.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using LearningHub.API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +47,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+// ── App Services ───────────────────────────────────────────
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<JwtHelper>();
 
 // ── Build the app ──────────────────────────────────────────
 var app = builder.Build();

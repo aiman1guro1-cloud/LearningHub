@@ -7,8 +7,8 @@
                 <div class="inline-flex items-center justify-center w-14 h-14 bg-primary-600 rounded-xl mb-3">
                     <span class="text-white text-2xl font-bold">L</span>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-800">LearningHub</h1>
-                <p class="text-gray-500 text-sm mt-1">Sign in to your account</p>
+                <h1 class="text-2xl font-bold text-gray-800">Create Account</h1>
+                <p class="text-gray-500 text-sm mt-1">Join LearningHub today</p>
             </div>
 
             <!-- Error -->
@@ -17,7 +17,16 @@
             </div>
 
             <!-- Form -->
-            <form @submit.prevent="handleLogin" class="space-y-4">
+            <form @submit.prevent="handleRegister" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input v-model="fullName"
+                           type="text"
+                           placeholder="Juan dela Cruz"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                           required />
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input v-model="email"
@@ -31,22 +40,31 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                     <input v-model="password"
                            type="password"
-                           placeholder="••••••••"
+                           placeholder="Min. 6 characters"
                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                            required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Register as</label>
+                    <select v-model="role"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <option value="Student">Student</option>
+                        <option value="Instructor">Instructor</option>
+                    </select>
                 </div>
 
                 <button type="submit"
                         :disabled="loading"
                         class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
-                    {{ loading ? 'Signing in...' : 'Sign In' }}
+                    {{ loading ? 'Creating account...' : 'Create Account' }}
                 </button>
             </form>
 
-            <!-- Register link -->
+            <!-- Login link -->
             <p class="text-center text-sm text-gray-500 mt-6">
-                Don't have an account?
-                <RouterLink to="/register" class="text-primary-600 font-medium hover:underline">Register</RouterLink>
+                Already have an account?
+                <RouterLink to="/login" class="text-primary-600 font-medium hover:underline">Sign in</RouterLink>
             </p>
         </div>
     </div>
@@ -57,30 +75,28 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/authStore'
 
-const router   = useRouter()
+const router    = useRouter()
 const authStore = useAuthStore()
 
+const fullName = ref('')
 const email    = ref('')
 const password = ref('')
+const role     = ref('Student')
 const loading  = ref(false)
 const error    = ref('')
 
-async function handleLogin() {
+async function handleRegister() {
   error.value   = ''
   loading.value = true
   try {
-    await authStore.login(email.value, password.value)
-    redirectByRole(authStore.userRole)
+    await authStore.register(fullName.value, email.value, password.value, role.value)
+    const userRole = authStore.userRole
+    if (userRole === 'Instructor') return router.push('/instructor/dashboard')
+    if (userRole === 'Student')    return router.push('/student/dashboard')
   } catch (err) {
-    error.value = err.response?.data?.message || 'Login failed. Please try again.'
+    error.value = err.response?.data?.message || 'Registration failed. Please try again.'
   } finally {
     loading.value = false
   }
-}
-
-function redirectByRole(role) {
-  if (role === 'Admin')      return router.push('/admin/dashboard')
-  if (role === 'Instructor') return router.push('/instructor/dashboard')
-  if (role === 'Student')    return router.push('/student/dashboard')
 }
 </script>
