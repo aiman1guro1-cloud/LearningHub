@@ -68,6 +68,11 @@
                                 class="text-sm bg-primary-50 text-primary-700 hover:bg-primary-100 px-3 py-1.5 rounded-lg font-medium transition-colors">
                             Manage
                         </button>
+                        <!-- NEW Progress button -->
+                        <button @click="goToProgress(course.id)"
+                                class="text-sm bg-green-50 text-green-700 hover:bg-green-100 px-3 py-1.5 rounded-lg font-medium transition-colors">
+                            Progress
+                        </button>
                         <button @click="openEditModal(course)"
                                 class="text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-medium transition-colors">
                             Edit
@@ -237,6 +242,11 @@
 
     function goToContent(courseId) {
         router.push(`/instructor/courses/${courseId}/content`)
+    }
+
+    // NEW: Navigate to course progress view
+    function goToProgress(courseId) {
+        router.push(`/instructor/courses/${courseId}/progress`)
     }
 
     function logout() {

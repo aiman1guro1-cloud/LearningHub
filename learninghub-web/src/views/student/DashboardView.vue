@@ -37,9 +37,26 @@
 
             <!-- ── My Courses Tab ─────────────────────────────── -->
             <div v-if="activeTab === 'my'">
+                <!-- Header with stats (updated) -->
                 <div class="mb-6">
                     <h1 class="text-2xl font-bold text-gray-800">My Courses</h1>
                     <p class="text-gray-500 text-sm mt-1">Continue where you left off</p>
+
+                    <!-- Stats row -->
+                    <div v-if="enrollments.length > 0" class="flex gap-4 mt-4">
+                        <div class="bg-white border border-gray-200 rounded-xl px-4 py-3 text-center min-w-24">
+                            <p class="text-2xl font-bold text-primary-600">{{ enrollments.length }}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Enrolled</p>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-xl px-4 py-3 text-center min-w-24">
+                            <p class="text-2xl font-bold text-green-600">{{ completedCourses }}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Completed</p>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-xl px-4 py-3 text-center min-w-24">
+                            <p class="text-2xl font-bold text-amber-500">{{ averageProgress }}%</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Avg. Progress</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div v-if="loadingEnrollments" class="text-center py-16 text-gray-400">
@@ -228,6 +245,17 @@
             c.description.toLowerCase().includes(q) ||
             c.instructorName.toLowerCase().includes(q)
         )
+    })
+
+    // NEW: computed stats for the summary row
+    const completedCourses = computed(() =>
+        enrollments.value.filter(e => e.progressPercent === 100).length
+    )
+
+    const averageProgress = computed(() => {
+        if (enrollments.value.length === 0) return 0
+        const total = enrollments.value.reduce((sum, e) => sum + e.progressPercent, 0)
+        return Math.round(total / enrollments.value.length)
     })
 
     function isEnrolledIn(courseId) {
