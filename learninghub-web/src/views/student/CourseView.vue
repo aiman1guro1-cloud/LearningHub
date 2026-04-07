@@ -20,10 +20,22 @@
                     </div>
                     <span class="text-xs text-gray-600 font-medium">{{ progressPercent }}%</span>
                 </div>
+
+                <!-- NEW: Announcements & Discussions buttons -->
+                <button @click="router.push(`/courses/${courseId}/announcements`)"
+                        class="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                    📢 Announcements
+                </button>
+                <button @click="router.push(`/courses/${courseId}/discussions`)"
+                        class="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                    💬 Discussions
+                </button>
+
                 <span class="text-sm text-gray-500">{{ user?.fullName }}</span>
             </div>
         </nav>
 
+        <!-- rest of the template unchanged -->
         <div v-if="loading" class="text-center py-16 text-gray-400">Loading course...</div>
 
         <div v-else-if="!course" class="text-center py-16">

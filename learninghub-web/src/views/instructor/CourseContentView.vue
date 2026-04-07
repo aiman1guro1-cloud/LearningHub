@@ -8,6 +8,15 @@
                         class="text-gray-400 hover:text-gray-600 transition-colors">
                     ← Back
                 </button>
+                <!-- NEW Announcements & Discussions buttons -->
+                <button @click="router.push(`/courses/${courseId}/announcements`)"
+                        class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-medium transition-colors">
+                    📢 Announcements
+                </button>
+                <button @click="router.push(`/courses/${courseId}/discussions`)"
+                        class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-medium transition-colors">
+                    💬 Discussions
+                </button>
                 <span class="text-gray-300">|</span>
                 <span class="font-semibold text-gray-800 truncate max-w-xs">{{ course?.title }}</span>
             </div>
@@ -174,131 +183,131 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { courseService } from '../../services/courseService'
+    import { ref, onMounted } from 'vue'
+    import { useRouter, useRoute } from 'vue-router'
+    import { courseService } from '../../services/courseService'
 
-const router = useRouter()
-const route  = useRoute()
-const courseId = Number(route.params.courseId)
+    const router = useRouter()
+    const route = useRoute()
+    const courseId = Number(route.params.courseId)
 
-const course  = ref(null)
-const modules = ref([])
-const loading = ref(true)
-const saving  = ref(false)
+    const course = ref(null)
+    const modules = ref([])
+    const loading = ref(true)
+    const saving = ref(false)
 
-// Module modal
-const showModuleModal = ref(false)
-const editingModule   = ref(null)
-const moduleForm      = ref({ title: '', orderIndex: 0 })
+    // Module modal
+    const showModuleModal = ref(false)
+    const editingModule = ref(null)
+    const moduleForm = ref({ title: '', orderIndex: 0 })
 
-// Material modal
-const showMaterialModal = ref(false)
-const activeMaterialModuleId = ref(null)
-const materialForm = ref({ title: '', type: 'Video', orderIndex: 0 })
-const selectedFile = ref(null)
+    // Material modal
+    const showMaterialModal = ref(false)
+    const activeMaterialModuleId = ref(null)
+    const materialForm = ref({ title: '', type: 'Video', orderIndex: 0 })
+    const selectedFile = ref(null)
 
-// Delete modal
-const showDeleteModal = ref(false)
-const deletingItem    = ref(null)
-const deleteType      = ref('') // 'module' or 'material'
-const deleteMeta      = ref(null)
+    // Delete modal
+    const showDeleteModal = ref(false)
+    const deletingItem = ref(null)
+    const deleteType = ref('') // 'module' or 'material'
+    const deleteMeta = ref(null)
 
-onMounted(loadContent)
+    onMounted(loadContent)
 
-async function loadContent() {
-  loading.value = true
-  try {
-    const res = await courseService.getCourseDetail(courseId)
-    course.value  = res.data
-    modules.value = res.data.modules || []
-  } finally {
-    loading.value = false
-  }
-}
-
-// ── Modules ─────────────────────────────────────────────
-function openModuleModal(mod) {
-  editingModule.value = mod
-  moduleForm.value = mod
-    ? { title: mod.title, orderIndex: mod.orderIndex }
-    : { title: '', orderIndex: modules.value.length }
-  showModuleModal.value = true
-}
-
-async function submitModule() {
-  if (!moduleForm.value.title.trim()) return
-  saving.value = true
-  try {
-    if (editingModule.value) {
-      await courseService.updateModule(courseId, editingModule.value.id, moduleForm.value)
-    } else {
-      await courseService.createModule(courseId, moduleForm.value)
+    async function loadContent() {
+        loading.value = true
+        try {
+            const res = await courseService.getCourseDetail(courseId)
+            course.value = res.data
+            modules.value = res.data.modules || []
+        } finally {
+            loading.value = false
+        }
     }
-    showModuleModal.value = false
-    await loadContent()
-  } finally {
-    saving.value = false
-  }
-}
 
-// ── Materials ────────────────────────────────────────────
-function openMaterialModal(moduleId) {
-  activeMaterialModuleId.value = moduleId
-  materialForm.value = { title: '', type: 'Video', orderIndex: 0 }
-  selectedFile.value = null
-  showMaterialModal.value = true
-}
-
-function onFileChange(e) {
-  selectedFile.value = e.target.files[0] || null
-}
-
-async function submitMaterial() {
-  if (!materialForm.value.title.trim()) return
-  saving.value = true
-  try {
-    const formData = new FormData()
-    formData.append('title',      materialForm.value.title)
-    formData.append('type',       materialForm.value.type)
-    formData.append('orderIndex', materialForm.value.orderIndex)
-    if (selectedFile.value) formData.append('file', selectedFile.value)
-
-    await courseService.createMaterial(activeMaterialModuleId.value, formData)
-    showMaterialModal.value = false
-    await loadContent()
-  } finally {
-    saving.value = false
-  }
-}
-
-// ── Delete ───────────────────────────────────────────────
-function confirmDeleteModule(mod) {
-  deletingItem.value  = mod
-  deleteType.value    = 'module'
-  deleteMeta.value    = null
-  showDeleteModal.value = true
-}
-
-function confirmDeleteMaterial(moduleId, mat) {
-  deletingItem.value  = mat
-  deleteType.value    = 'material'
-  deleteMeta.value    = { moduleId }
-  showDeleteModal.value = true
-}
-
-async function executeDelete() {
-  saving.value = true
-  try {
-    if (deleteType.value === 'module') {
-      await courseService.deleteModule(courseId, deletingItem.value.id)
-    } else {
-      await courseService.deleteMaterial(deleteMeta.value.moduleId, deletingItem.value.id)
+    // ── Modules ─────────────────────────────────────────────
+    function openModuleModal(mod) {
+        editingModule.value = mod
+        moduleForm.value = mod
+            ? { title: mod.title, orderIndex: mod.orderIndex }
+            : { title: '', orderIndex: modules.value.length }
+        showModuleModal.value = true
     }
-    showDeleteModal.value = false
-    await loadContent()
-  } finally {
-    saving.value = false
-  }
-}
+
+    async function submitModule() {
+        if (!moduleForm.value.title.trim()) return
+        saving.value = true
+        try {
+            if (editingModule.value) {
+                await courseService.updateModule(courseId, editingModule.value.id, moduleForm.value)
+            } else {
+                await courseService.createModule(courseId, moduleForm.value)
+            }
+            showModuleModal.value = false
+            await loadContent()
+        } finally {
+            saving.value = false
+        }
+    }
+
+    // ── Materials ────────────────────────────────────────────
+    function openMaterialModal(moduleId) {
+        activeMaterialModuleId.value = moduleId
+        materialForm.value = { title: '', type: 'Video', orderIndex: 0 }
+        selectedFile.value = null
+        showMaterialModal.value = true
+    }
+
+    function onFileChange(e) {
+        selectedFile.value = e.target.files[0] || null
+    }
+
+    async function submitMaterial() {
+        if (!materialForm.value.title.trim()) return
+        saving.value = true
+        try {
+            const formData = new FormData()
+            formData.append('title', materialForm.value.title)
+            formData.append('type', materialForm.value.type)
+            formData.append('orderIndex', materialForm.value.orderIndex)
+            if (selectedFile.value) formData.append('file', selectedFile.value)
+
+            await courseService.createMaterial(activeMaterialModuleId.value, formData)
+            showMaterialModal.value = false
+            await loadContent()
+        } finally {
+            saving.value = false
+        }
+    }
+
+    // ── Delete ───────────────────────────────────────────────
+    function confirmDeleteModule(mod) {
+        deletingItem.value = mod
+        deleteType.value = 'module'
+        deleteMeta.value = null
+        showDeleteModal.value = true
+    }
+
+    function confirmDeleteMaterial(moduleId, mat) {
+        deletingItem.value = mat
+        deleteType.value = 'material'
+        deleteMeta.value = { moduleId }
+        showDeleteModal.value = true
+    }
+
+    async function executeDelete() {
+        saving.value = true
+        try {
+            if (deleteType.value === 'module') {
+                await courseService.deleteModule(courseId, deletingItem.value.id)
+            } else {
+                await courseService.deleteMaterial(deleteMeta.value.moduleId, deletingItem.value.id)
+            }
+            showDeleteModal.value = false
+            await loadContent()
+        } finally {
+            saving.value = false
+        }
+    }
 </script>

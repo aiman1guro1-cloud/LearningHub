@@ -54,6 +54,8 @@ builder.Services.AddScoped<ModuleService>();
 builder.Services.AddScoped<MaterialService>();
 builder.Services.AddScoped<EnrollmentService>();
 builder.Services.AddScoped<ProgressService>();
+builder.Services.AddScoped<DiscussionService>();
+builder.Services.AddScoped<AnnouncementService>();
 
 builder.Services.AddAuthorization();
 

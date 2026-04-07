@@ -62,6 +62,20 @@ const router = createRouter({
             meta: { requiresAuth: true, role: 'Student' }
         },
 
+        // ── Shared routes (discussions & announcements) ────────
+        {
+            path: '/courses/:courseId/discussions',
+            name: 'Discussions',
+            component: () => import('../views/shared/DiscussionView.vue'),
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/courses/:courseId/announcements',
+            name: 'Announcements',
+            component: () => import('../views/shared/AnnouncementsView.vue'),
+            meta: { requiresAuth: true }
+        },
+
         // ── 404 fallback ───────────────────────────────────────
         {
             path: '/:pathMatch(.*)*',
