@@ -35,6 +35,12 @@ const router = createRouter({
             component: () => import('../views/instructor/DashboardView.vue'),
             meta: { requiresAuth: true, role: 'Instructor' }
         },
+        {
+            path: '/instructor/courses/:courseId/content',
+            name: 'CourseContent',
+            component: () => import('../views/instructor/CourseContentView.vue'),
+            meta: { requiresAuth: true, role: 'Instructor' }
+        },
 
         // ── Student routes ─────────────────────────────────────
         {

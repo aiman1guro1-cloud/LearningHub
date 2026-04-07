@@ -49,6 +49,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddScoped<CourseService>();
+builder.Services.AddScoped<ModuleService>();
+builder.Services.AddScoped<MaterialService>();
+
 builder.Services.AddAuthorization();
 
 // ── App Services ───────────────────────────────────────────
@@ -71,7 +75,8 @@ using (var scope = app.Services.CreateScope())
     DbSeeder.Seed(db);
 }
 
-// app.UseHttpsRedirection(); // comment this out temporarily
+app.UseHttpsRedirection(); // comment this out temporarily
+app.UseStaticFiles();
 app.UseCors("AllowVue");
 
 app.UseHttpsRedirection();
