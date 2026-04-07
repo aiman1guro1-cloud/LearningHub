@@ -23,7 +23,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVue", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "https://localhost:5173"
+              )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -67,6 +70,9 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     DbSeeder.Seed(db);
 }
+
+// app.UseHttpsRedirection(); // comment this out temporarily
+app.UseCors("AllowVue");
 
 app.UseHttpsRedirection();
 app.UseCors("AllowVue");
