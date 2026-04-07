@@ -49,6 +49,12 @@ const router = createRouter({
             component: () => import('../views/student/DashboardView.vue'),
             meta: { requiresAuth: true, role: 'Student' }
         },
+        {
+            path: '/student/courses/:courseId',
+            name: 'StudentCourse',
+            component: () => import('../views/student/CourseView.vue'),
+            meta: { requiresAuth: true, role: 'Student' }
+        },
 
         // ── 404 fallback ───────────────────────────────────────
         {

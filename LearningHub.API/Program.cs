@@ -52,12 +52,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<CourseService>();
 builder.Services.AddScoped<ModuleService>();
 builder.Services.AddScoped<MaterialService>();
+builder.Services.AddScoped<EnrollmentService>();
 
 builder.Services.AddAuthorization();
 
 // ── App Services ───────────────────────────────────────────
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtHelper>();
+
 
 // ── Build the app ──────────────────────────────────────────
 var app = builder.Build();
