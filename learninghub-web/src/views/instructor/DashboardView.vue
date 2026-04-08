@@ -12,7 +12,10 @@
                 <span class="text-sm text-gray-500">Instructor</span>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-600">{{ user?.fullName }}</span>
+                <RouterLink :to="`/profile`"
+                            class="text-sm text-gray-600 hover:text-primary-600 transition-colors cursor-pointer">
+                    {{ user?.fullName }}
+                </RouterLink>
                 <button @click="logout"
                         class="text-sm text-red-500 hover:text-red-700 font-medium">
                     Logout
@@ -34,8 +37,10 @@
                 </button>
             </div>
 
-            <!-- Loading -->
-            <div v-if="loading" class="text-center py-16 text-gray-400">Loading courses...</div>
+            <!-- Loading Skeletons -->
+            <div v-if="loading" class="grid gap-4">
+                <CardSkeleton v-for="n in 3" :key="n" />
+            </div>
 
             <!-- Empty -->
             <div v-else-if="courses.length === 0" class="text-center py-16">
@@ -158,6 +163,7 @@
     import { useRouter } from 'vue-router'
     import { useAuthStore } from '../../stores/authStore'
     import { courseService } from '../../services/courseService'
+    import CardSkeleton from '../../components/CardSkeleton.vue'
 
     const router = useRouter()
     const authStore = useAuthStore()

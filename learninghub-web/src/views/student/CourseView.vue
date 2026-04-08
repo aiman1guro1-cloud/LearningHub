@@ -214,12 +214,14 @@
     import { ref, computed, onMounted } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
     import { useAuthStore } from '../../stores/authStore'
+    import { useToastStore } from '../../stores/toastStore'
     import { courseService } from '../../services/courseService'
     import { progressService } from '../../services/progressService'
 
     const router = useRouter()
     const route = useRoute()
     const authStore = useAuthStore()
+    const toast = useToastStore()
     const user = authStore.user
     const courseId = Number(route.params.courseId)
     const apiBase = import.meta.env.VITE_API_URL.replace('/api', '')
@@ -297,7 +299,7 @@
                 completedIds.value.push(mat.id)
             }
         } catch (err) {
-            alert(err.response?.data?.message || 'Could not mark complete.')
+            toast.error(err.response?.data?.message || 'Could not mark complete.')
         } finally {
             marking.value = false
         }
@@ -309,7 +311,7 @@
             await progressService.unmarkComplete(courseId, mat.id)
             completedIds.value = completedIds.value.filter(id => id !== mat.id)
         } catch (err) {
-            alert(err.response?.data?.message || 'Could not unmark.')
+            toast.error(err.response?.data?.message || 'Could not unmark.')
         } finally {
             marking.value = false
         }

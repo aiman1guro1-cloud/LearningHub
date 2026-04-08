@@ -66,5 +66,22 @@ namespace LearningHub.API.Services
                 UserId = user.Id
             };
         }
+
+        public async Task<(bool Success, string Message)> ChangePasswordAsync(
+            int userId, ChangePasswordDto dto)
+        {
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null) return (false, "User not found.");
+
+            bool valid = BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash);
+            if (!valid) return (false, "Current password is incorrect.");
+
+            if (dto.NewPassword.Length < 6)
+                return (false, "New password must be at least 6 characters.");
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            await _db.SaveChangesAsync();
+            return (true, "Password changed successfully.");
+        }
     }
 }

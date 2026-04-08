@@ -26,7 +26,10 @@
                     Browse Courses
                 </button>
                 <span class="text-gray-300">|</span>
-                <span class="text-sm text-gray-600">{{ user?.fullName }}</span>
+                <RouterLink :to="`/profile`"
+                            class="text-sm text-gray-600 hover:text-primary-600 transition-colors cursor-pointer">
+                    {{ user?.fullName }}
+                </RouterLink>
                 <button @click="logout" class="text-sm text-red-500 hover:text-red-700 font-medium">
                     Logout
                 </button>
@@ -59,8 +62,9 @@
                     </div>
                 </div>
 
-                <div v-if="loadingEnrollments" class="text-center py-16 text-gray-400">
-                    Loading your courses...
+                <!-- Loading Skeletons -->
+                <div v-if="loadingEnrollments" class="grid gap-4">
+                    <CardSkeleton v-for="n in 3" :key="n" />
                 </div>
 
                 <div v-else-if="enrollments.length === 0" class="text-center py-16">
@@ -193,11 +197,14 @@
     import { ref, computed, onMounted } from 'vue'
     import { useRouter } from 'vue-router'
     import { useAuthStore } from '../../stores/authStore'
+    import { useToastStore } from '../../stores/toastStore'
     import { enrollmentService } from '../../services/enrollmentService'
     import { courseService } from '../../services/courseService'
+    import CardSkeleton from '../../components/CardSkeleton.vue'
 
     const router = useRouter()
     const authStore = useAuthStore()
+    const toast = useToastStore()
     const user = authStore.user
 
     const activeTab = ref('my')
@@ -267,8 +274,9 @@
         try {
             await enrollmentService.enroll(course.id)
             await loadEnrollments()
+            toast.success(`Enrolled in "${course.title}" successfully!`)
         } catch (err) {
-            alert(err.response?.data?.message || 'Enrollment failed.')
+            toast.error(err.response?.data?.message || 'Enrollment failed.')
         } finally {
             enrollingId.value = null
         }

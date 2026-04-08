@@ -12,7 +12,10 @@
                 <span class="text-sm text-gray-500">Admin Panel</span>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-600">{{ user?.fullName }}</span>
+                <RouterLink :to="`/profile`"
+                            class="text-sm text-gray-600 hover:text-primary-600 transition-colors cursor-pointer">
+                    {{ user?.fullName }}
+                </RouterLink>
                 <button @click="logout"
                         class="text-sm text-red-500 hover:text-red-700 font-medium">
                     Logout
@@ -405,10 +408,12 @@
     import { ref, computed, onMounted } from 'vue'
     import { useRouter } from 'vue-router'
     import { useAuthStore } from '../../stores/authStore'
+    import { useToastStore } from '../../stores/toastStore'
     import { adminService } from '../../services/adminService'
 
     const router = useRouter()
     const authStore = useAuthStore()
+    const toast = useToastStore()
     const user = authStore.user
 
     // ── Tabs ─────────────────────────────────────────────────
@@ -609,7 +614,7 @@
             }
             showDeleteModal.value = false
         } catch (err) {
-            alert(err.response?.data?.message || 'Delete failed.')
+            toast.error(err.response?.data?.message || 'Delete failed.')
         } finally {
             deleting.value = false
         }

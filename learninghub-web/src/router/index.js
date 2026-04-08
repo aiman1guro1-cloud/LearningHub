@@ -11,13 +11,19 @@ const router = createRouter({
             path: '/login',
             name: 'Login',
             component: () => import('../views/auth/LoginView.vue'),
-            meta: { guestOnly: true }
+            meta: { guestOnly: true, title: 'Sign In' }
         },
         {
             path: '/register',
             name: 'Register',
             component: () => import('../views/auth/RegisterView.vue'),
-            meta: { guestOnly: true }
+            meta: { guestOnly: true, title: 'Sign Up' }
+        },
+        {
+            path: '/profile',
+            name: 'Profile',
+            component: () => import('../views/shared/ProfileView.vue'),
+            meta: { requiresAuth: true, title: 'My Profile' }
         },
 
         // ── Admin routes ───────────────────────────────────────
@@ -25,7 +31,7 @@ const router = createRouter({
             path: '/admin/dashboard',
             name: 'AdminDashboard',
             component: () => import('../views/admin/DashboardView.vue'),
-            meta: { requiresAuth: true, role: 'Admin' }
+            meta: { requiresAuth: true, role: 'Admin', title: 'Admin Dashboard' }
         },
 
         // ── Instructor routes ──────────────────────────────────
@@ -33,19 +39,19 @@ const router = createRouter({
             path: '/instructor/dashboard',
             name: 'InstructorDashboard',
             component: () => import('../views/instructor/DashboardView.vue'),
-            meta: { requiresAuth: true, role: 'Instructor' }
+            meta: { requiresAuth: true, role: 'Instructor', title: 'Instructor Dashboard' }
         },
         {
             path: '/instructor/courses/:courseId/content',
             name: 'CourseContent',
             component: () => import('../views/instructor/CourseContentView.vue'),
-            meta: { requiresAuth: true, role: 'Instructor' }
+            meta: { requiresAuth: true, role: 'Instructor', title: 'Course Content' }
         },
         {
             path: '/instructor/courses/:courseId/progress',
             name: 'StudentProgress',
             component: () => import('../views/instructor/StudentProgressView.vue'),
-            meta: { requiresAuth: true, role: 'Instructor' }
+            meta: { requiresAuth: true, role: 'Instructor', title: 'Student Progress' }
         },
 
         // ── Student routes ─────────────────────────────────────
@@ -53,13 +59,13 @@ const router = createRouter({
             path: '/student/dashboard',
             name: 'StudentDashboard',
             component: () => import('../views/student/DashboardView.vue'),
-            meta: { requiresAuth: true, role: 'Student' }
+            meta: { requiresAuth: true, role: 'Student', title: 'My Dashboard' }
         },
         {
             path: '/student/courses/:courseId',
             name: 'StudentCourse',
             component: () => import('../views/student/CourseView.vue'),
-            meta: { requiresAuth: true, role: 'Student' }
+            meta: { requiresAuth: true, role: 'Student', title: 'Course Details' }
         },
 
         // ── Shared routes (discussions & announcements) ────────
@@ -67,19 +73,21 @@ const router = createRouter({
             path: '/courses/:courseId/discussions',
             name: 'Discussions',
             component: () => import('../views/shared/DiscussionView.vue'),
-            meta: { requiresAuth: true }
+            meta: { requiresAuth: true, title: 'Discussions' }
         },
         {
             path: '/courses/:courseId/announcements',
             name: 'Announcements',
             component: () => import('../views/shared/AnnouncementsView.vue'),
-            meta: { requiresAuth: true }
+            meta: { requiresAuth: true, title: 'Announcements' }
         },
 
         // ── 404 fallback ───────────────────────────────────────
         {
             path: '/:pathMatch(.*)*',
-            redirect: '/login'
+            name: 'NotFound',
+            component: () => import('../views/NotFoundView.vue'),
+            meta: { title: 'Page Not Found' }
         }
     ]
 })
@@ -111,6 +119,12 @@ router.beforeEach((to, from, next) => {
     }
 
     next()
+})
+
+// ── Update page title after each navigation ────────────────
+router.afterEach((to) => {
+    const title = to.meta?.title
+    document.title = title ? `${title} — LearningHub` : 'LearningHub'
 })
 
 export default router

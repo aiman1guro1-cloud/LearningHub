@@ -1,6 +1,8 @@
 ﻿using LearningHub.API.DTOs;
 using LearningHub.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LearningHub.API.Controllers
 {
@@ -53,6 +55,17 @@ namespace LearningHub.API.Controllers
                 return Unauthorized(new { message = "Invalid email or password." });
 
             return Ok(result);
+        }
+
+        // POST api/auth/change-password
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var (success, message) = await _authService.ChangePasswordAsync(userId, dto);
+            if (!success) return BadRequest(new { message });
+            return Ok(new { message });
         }
     }
 }

@@ -239,150 +239,152 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '../../stores/authStore'
-import { discussionService } from '../../services/discussionService'
-import { courseService } from '../../services/courseService'
+    import { ref, onMounted } from 'vue'
+    import { useRouter, useRoute } from 'vue-router'
+    import { useAuthStore } from '../../stores/authStore'
+    import { useToastStore } from '../../stores/toastStore'
+    import { discussionService } from '../../services/discussionService'
+    import { courseService } from '../../services/courseService'
 
-const router   = useRouter()
-const route    = useRoute()
-const authStore = useAuthStore()
-const user     = authStore.user
-const courseId = Number(route.params.courseId)
+    const router = useRouter()
+    const route = useRoute()
+    const authStore = useAuthStore()
+    const toast = useToastStore()
+    const user = authStore.user
+    const courseId = Number(route.params.courseId)
 
-const posts       = ref([])
-const loading     = ref(true)
-const courseName  = ref('')
-const activePost  = ref(null)
-const newComment  = ref('')
-const submittingComment = ref(false)
+    const posts = ref([])
+    const loading = ref(true)
+    const courseName = ref('')
+    const activePost = ref(null)
+    const newComment = ref('')
+    const submittingComment = ref(false)
 
-const showCreateModal = ref(false)
-const createForm  = ref({ title: '', content: '' })
-const createError = ref('')
-const creating    = ref(false)
+    const showCreateModal = ref(false)
+    const createForm = ref({ title: '', content: '' })
+    const createError = ref('')
+    const creating = ref(false)
 
-const showDeletePostModal = ref(false)
-const deletingPost = ref(null)
-const deleting     = ref(false)
+    const showDeletePostModal = ref(false)
+    const deletingPost = ref(null)
+    const deleting = ref(false)
 
-onMounted(async () => {
-  await Promise.all([loadPosts(), loadCourseName()])
-})
-
-async function loadPosts() {
-  loading.value = true
-  try {
-    const res = await discussionService.getPosts(courseId)
-    posts.value = res.data
-  } finally {
-    loading.value = false
-  }
-}
-
-async function loadCourseName() {
-  try {
-    const res    = await courseService.getCourseDetail(courseId)
-    courseName.value = res.data.title
-  } catch { /* ignore */ }
-}
-
-async function openPost(post) {
-  const res  = await discussionService.getPost(courseId, post.id)
-  activePost.value = res.data
-}
-
-function openCreateModal() {
-  createForm.value  = { title: '', content: '' }
-  createError.value = ''
-  showCreateModal.value = true
-}
-
-async function submitPost() {
-  if (!createForm.value.title.trim() || !createForm.value.content.trim()) {
-    createError.value = 'Title and content are required.'
-    return
-  }
-  creating.value = true
-  try {
-    await discussionService.createPost(courseId, createForm.value)
-    showCreateModal.value = false
-    await loadPosts()
-  } catch (err) {
-    createError.value = err.response?.data?.message || 'Failed to create post.'
-  } finally {
-    creating.value = false
-  }
-}
-
-async function submitComment() {
-  if (!newComment.value.trim()) return
-  submittingComment.value = true
-  try {
-    const res = await discussionService.addComment(courseId, activePost.value.id, {
-      content: newComment.value.trim()
+    onMounted(async () => {
+        await Promise.all([loadPosts(), loadCourseName()])
     })
-    activePost.value.comments.push(res.data)
-    newComment.value = ''
-    // Update comment count in list
-    const post = posts.value.find(p => p.id === activePost.value.id)
-    if (post) post.commentCount++
-  } catch (err) {
-    alert(err.response?.data?.message || 'Failed to add comment.')
-  } finally {
-    submittingComment.value = false
-  }
-}
 
-async function deleteComment(comment) {
-  try {
-    await discussionService.deleteComment(courseId, activePost.value.id, comment.id)
-    activePost.value.comments = activePost.value.comments.filter(c => c.id !== comment.id)
-    const post = posts.value.find(p => p.id === activePost.value.id)
-    if (post) post.commentCount--
-  } catch (err) {
-    alert(err.response?.data?.message || 'Failed to delete comment.')
-  }
-}
+    async function loadPosts() {
+        loading.value = true
+        try {
+            const res = await discussionService.getPosts(courseId)
+            posts.value = res.data
+        } finally {
+            loading.value = false
+        }
+    }
 
-function confirmDeletePost(post) {
-  deletingPost.value = post
-  showDeletePostModal.value = true
-}
+    async function loadCourseName() {
+        try {
+            const res = await courseService.getCourseDetail(courseId)
+            courseName.value = res.data.title
+        } catch { /* ignore */ }
+    }
 
-async function executeDeletePost() {
-  deleting.value = true
-  try {
-    await discussionService.deletePost(courseId, deletingPost.value.id)
-    showDeletePostModal.value = false
-    await loadPosts()
-  } finally {
-    deleting.value = false
-  }
-}
+    async function openPost(post) {
+        const res = await discussionService.getPost(courseId, post.id)
+        activePost.value = res.data
+    }
 
-function canDelete(post) {
-  return post.userId === user?.id ||
-    user?.role === 'Admin' ||
-    user?.role === 'Instructor'
-}
+    function openCreateModal() {
+        createForm.value = { title: '', content: '' }
+        createError.value = ''
+        showCreateModal.value = true
+    }
 
-function canDeleteComment(comment) {
-  return comment.userId === user?.id ||
-    user?.role === 'Admin' ||
-    user?.role === 'Instructor'
-}
+    async function submitPost() {
+        if (!createForm.value.title.trim() || !createForm.value.content.trim()) {
+            createError.value = 'Title and content are required.'
+            return
+        }
+        creating.value = true
+        try {
+            await discussionService.createPost(courseId, createForm.value)
+            showCreateModal.value = false
+            await loadPosts()
+        } catch (err) {
+            createError.value = err.response?.data?.message || 'Failed to create post.'
+        } finally {
+            creating.value = false
+        }
+    }
 
-function goBack() {
-  const role = user?.role
-  if (role === 'Instructor') router.push('/instructor/dashboard')
-  else router.push(`/student/courses/${courseId}`)
-}
+    async function submitComment() {
+        if (!newComment.value.trim()) return
+        submittingComment.value = true
+        try {
+            const res = await discussionService.addComment(courseId, activePost.value.id, {
+                content: newComment.value.trim()
+            })
+            activePost.value.comments.push(res.data)
+            newComment.value = ''
+            // Update comment count in list
+            const post = posts.value.find(p => p.id === activePost.value.id)
+            if (post) post.commentCount++
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to add comment.')
+        } finally {
+            submittingComment.value = false
+        }
+    }
 
-function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-  })
-}
+    async function deleteComment(comment) {
+        try {
+            await discussionService.deleteComment(courseId, activePost.value.id, comment.id)
+            activePost.value.comments = activePost.value.comments.filter(c => c.id !== comment.id)
+            const post = posts.value.find(p => p.id === activePost.value.id)
+            if (post) post.commentCount--
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to delete comment.')
+        }
+    }
+
+    function confirmDeletePost(post) {
+        deletingPost.value = post
+        showDeletePostModal.value = true
+    }
+
+    async function executeDeletePost() {
+        deleting.value = true
+        try {
+            await discussionService.deletePost(courseId, deletingPost.value.id)
+            showDeletePostModal.value = false
+            await loadPosts()
+        } finally {
+            deleting.value = false
+        }
+    }
+
+    function canDelete(post) {
+        return post.userId === user?.id ||
+            user?.role === 'Admin' ||
+            user?.role === 'Instructor'
+    }
+
+    function canDeleteComment(comment) {
+        return comment.userId === user?.id ||
+            user?.role === 'Admin' ||
+            user?.role === 'Instructor'
+    }
+
+    function goBack() {
+        const role = user?.role
+        if (role === 'Instructor') router.push('/instructor/dashboard')
+        else router.push(`/student/courses/${courseId}`)
+    }
+
+    function formatDate(dateStr) {
+        return new Date(dateStr).toLocaleDateString('en-US', {
+            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        })
+    }
 </script>
